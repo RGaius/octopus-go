@@ -3,8 +3,8 @@ package datasource
 import (
 	"database/sql"
 	"errors"
-	"github.com/RGaius/octopus/pkg/log"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cast"
 	"sync"
 	"time"
@@ -55,11 +55,11 @@ func (m *MySQL) Available(connect map[string]interface{}) AvailableResp {
 func (m *MySQL) Invoke(param *InvokeParam) (interface{}, error) {
 	db, err := m.getOrCreate(param.Name, param.Datasource)
 	if err != nil {
-		log.GetSugaredLogger().Warnf("Error getting or creating database connection:%v", err)
+		logrus.Warnf("Error getting or creating database connection:%v", err)
 		return 0, nil
 	}
 	querySql := cast.ToString(param.Interface["sql"])
-	log.GetSugaredLogger().Infof("sql:%s", querySql)
+	logrus.Infof("sql:%s", querySql)
 	// 执行SQL语句，如果列表，则返回list map
 	rows, err := db.Query(querySql)
 	if err != nil {

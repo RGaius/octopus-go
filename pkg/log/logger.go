@@ -1,35 +1,51 @@
 package log
 
-import "go.uber.org/zap"
+import (
+	"fmt"
+	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+	"gopkg.in/natefinch/lumberjack.v2"
+	"io"
+)
 
 var (
 	logger     *zap.Logger
 	sugaredLog *zap.SugaredLogger
 )
 
-func init() {
-	// 根据实际情况配置日志级别、编码器、输出等
-	config := zap.NewProductionConfig()
-	config.Level.SetLevel(zap.InfoLevel) // 示例：设置日志级别为 Info
-	config.Encoding = "console"          // 示例：使用颜色丰富的控制台输出
+const defaultTimestampFormat = "2006-01-02T15:04:05.99999-07:00"
 
-	// 创建并初始化 Logger
-	var err error
-	logger, err = config.Build()
-	if err != nil {
-		panic("Failed to initialize logger: " + err.Error())
+type LoggerConfig struct {
+	Output     io.Writer
+	Level      string `yaml:"level"`
+	Filename   string `yaml:"filename"`
+	MaxSize    int    `yaml:"maxsize"`
+	MaxAge     int    `yaml:"maxage"`
+	MaxBackups int    `yaml:"maxbackups"`
+	LocalTime  bool   `yaml:"localtime"`
+	Compress   bool   `yaml:"compress"`
+}
+
+func InitLogger(config LoggerConfig) *logrus.Logger {
+	logger := logrus.StandardLogger()
+	if config.Output == nil {
+		logger.SetOutput(&lumberjack.Logger{
+			Filename:   config.Filename,
+			MaxSize:    config.MaxSize,
+			MaxBackups: config.MaxBackups,
+			MaxAge:     config.MaxAge,
+			Compress:   config.Compress,
+		})
+	} else {
+		logger.SetOutput(config.Output)
 	}
 
-	// 创建 SugaredLogger
-	sugaredLog = logger.Sugar()
-}
+	level, err := logrus.ParseLevel(config.Level)
+	if err != nil {
+		panic(fmt.Sprintf("parse log level: %+v", err))
+	}
+	logger.SetLevel(level)
 
-// GetLogger 返回全局的 zap.Logger 实例
-func GetLogger() *zap.Logger {
+	logger.SetReportCaller(true)
 	return logger
-}
-
-// GetSugaredLogger 返回全局的 zap.SugaredLogger 实例
-func GetSugaredLogger() *zap.SugaredLogger {
-	return sugaredLog
 }

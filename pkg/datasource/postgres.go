@@ -3,6 +3,7 @@ package datasource
 import (
 	"database/sql"
 	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cast"
 	"log"
 	"strings"
@@ -60,7 +61,7 @@ func (p *Postgres) Available(connect map[string]interface{}) AvailableResp {
 func (p *Postgres) Invoke(param *InvokeParam) (interface{}, error) {
 	db, err := p.getOrCreate(param.Name, param.Datasource)
 	if err != nil {
-		log.Printf("Error getting or creating database connection: %v", err)
+		logrus.Errorf("Error getting or creating database connection: %v", err)
 		return 0, nil
 	}
 	querySql := cast.ToString(param.Interface["sql"])

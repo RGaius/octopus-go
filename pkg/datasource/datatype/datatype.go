@@ -1,6 +1,8 @@
 package datatype
 
-import "log"
+import (
+	"github.com/sirupsen/logrus"
+)
 
 type DataType interface {
 	// convert value to the data type
@@ -22,7 +24,7 @@ func ToGoTypeValue(columnType string, value interface{}) interface{} {
 		return value
 	}
 	if _, ok := interfaceMap[columnType]; !ok {
-		log.Println("not found type:", columnType)
+		logrus.Errorf("not found type:%s", columnType)
 		return value
 	}
 	formatValue, err := interfaceMap[columnType].convert(value)

@@ -3,7 +3,7 @@ package datasource
 import (
 	"database/sql"
 	"github.com/RGaius/octopus/pkg/datasource/datatype"
-	"github.com/RGaius/octopus/pkg/log"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cast"
 	"strings"
 	"text/template"
@@ -116,7 +116,7 @@ func ProcessRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 
 		if err := rows.Scan(values...); err != nil {
 			// 改为记录错误，而不是直接退出
-			log.GetSugaredLogger().Errorf("Error scanning row: %v", err)
+			logrus.Errorf("Error scanning row: %v", err)
 			continue // 继续处理下一行，而不是终止整个函数
 		}
 
@@ -125,7 +125,7 @@ func ProcessRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 			// 打印
 			if colVal := values[i]; colVal != nil {
 				val := datatype.ToGoTypeValue(columnType.DatabaseTypeName(), colVal)
-				log.GetSugaredLogger().Infof("Column: %s, Type: %s, Value: %v", col, columnType.DatabaseTypeName(), val)
+				logrus.Infof("Column: %s, Type: %s, Value: %v", col, columnType.DatabaseTypeName(), val)
 				row[col] = val
 			} else {
 				row[col] = nil
@@ -136,7 +136,7 @@ func ProcessRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 
 	// 确保没有其他错误，例如来自rows.Close()
 	if err := rows.Err(); err != nil {
-		log.GetSugaredLogger().Errorf("Error occurred during rows iteration: %v", err)
+		logrus.Errorf("Error occurred during rows iteration: %v", err)
 		return nil, err
 	}
 	return results, nil
