@@ -95,7 +95,7 @@ func CreateDb(driverName string, url string) (*sql.DB, error) {
 	return db, nil
 }
 
-// 假设rows来自一个数据库查询，columns是列的名称切片
+// ProcessRows 假设rows来自一个数据库查询，columns是列的名称切片
 func ProcessRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 	var results []map[string]interface{}
 	// 获取列名
@@ -125,7 +125,7 @@ func ProcessRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 			// 打印
 			if colVal := values[i]; colVal != nil {
 				val := datatype.ToGoTypeValue(columnType.DatabaseTypeName(), colVal)
-				logrus.Infof("Column: %s, Type: %s, Value: %v", col, columnType.DatabaseTypeName(), val)
+				logrus.Infof("Column: %s, Username: %s, Value: %v", col, columnType.DatabaseTypeName(), val)
 				row[col] = val
 			} else {
 				row[col] = nil
